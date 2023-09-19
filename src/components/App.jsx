@@ -4,98 +4,74 @@ import Modal from './Modal/';
 import { fetchImages } from 'services/api';
 import LoadMore from 'components/Button/';
 import Loader from './Loader/';
-import React, { Component } from 'react';
+import { useState } from 'react';
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    images: [],
-    page: 1,
-    showModal: false,
-    largeImageURL: '',
-    isImagesShown: false,
-    totalHits: 0,
-    isLoading: false,
-  };
+export const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [isImagesShown, setIsImagesShown] = useState(false);
+  const [totalHits, setTotalHits] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  handleFormSubmit = searchQuery => {
-    if (searchQuery !== this.state.searchQuery) {
-      this.setState({
-        searchQuery,
-        page: 1,
-        images: [],
-        isImagesShown: false,
-        isLoading: true,
-      });
+  const handleFormSubmit = query => {
+    if (query !== searchQuery) {
+      setSearchQuery(query);
+      setPage(1);
+      setImages([]);
+      setIsImagesShown(false);
+      setIsLoading(true);
     }
   };
 
-  handleCloseModal = () => {
-    this.setState({
-      largeImageURL: '',
-      showModal: false,
-    });
+  const handleCloseModal = () => {
+    setLargeImageURL('');
+    setShowModal(false);
   };
-  handleImageClick = largeImageURL => {
-    this.setState({ largeImageURL, showModal: true });
+  const handleImageClick = largeImageURL => {
+    setLargeImageURL(largeImageURL);
+    setShowModal(true);
   };
-  fetchImagesAndUpdateState = async (searchQuery, page) => {
+
+  const fetchImagesAndUpdateState = async (searchQuery, page) => {
     try {
       const { hits, totalHits } = await fetchImages(searchQuery, page);
-      this.setState({ isLoading: true });
-      this.setState(prevState => ({
-        images: [...prevState.images, ...hits],
-        page: prevState.page + 1,
-        isImagesShown: true,
-        searchQuery,
-        totalHits,
-      }));
+      setIsLoading(true);
+      setImages(state => [...state, ...hits]);
+      setPage(state => state + 1);
+      setIsImagesShown(true);
+      setSearchQuery(searchQuery);
+      setTotalHits(totalHits);
     } catch (error) {
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleLoadMoreClick = () => {
-    const { searchQuery, page } = this.state;
+  const handleLoadMoreClick = () =>
+    fetchImagesAndUpdateState(searchQuery, page);
 
-    this.fetchImagesAndUpdateState(searchQuery, page);
-  };
+  const shouldShowButton = images.length < totalHits;
 
-  render() {
-    const {
-      searchQuery,
-      page,
-      images,
-      showModal,
-      largeImageURL,
-      isImagesShown,
-      totalHits,
-      isLoading,
-    } = this.state;
-    const shouldShowButton = images.length < totalHits;
-
-    return (
-      <div className="app">
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        {isLoading && <Loader />}
-        <ImageGallery
-          images={images}
-          searchQuery={searchQuery}
-          page={page}
-          onImageClick={this.handleImageClick}
-          renderImages={this.fetchImagesAndUpdateState}
-        />
-        {isImagesShown && shouldShowButton && (
-          <LoadMore onLoadMore={this.handleLoadMoreClick} />
-        )}
-        {showModal && (
-          <Modal
-            largeImageURL={largeImageURL}
-            onClose={this.handleCloseModal}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div className="app">
+      <Searchbar onSubmit={handleFormSubmit} />
+      {isLoading && <Loader />}
+      <ImageGallery
+        images={images}
+        searchQuery={searchQuery}
+        page={page}
+        onImageClick={handleImageClick}
+        renderImages={fetchImagesAndUpdateState}
+      />
+      {isImagesShown && shouldShowButton && (
+        <LoadMore onLoadMore={handleLoadMoreClick} />
+      )}
+      {showModal && (
+        <Modal largeImageURL={largeImageURL} onClose={handleCloseModal} />
+      )}
+    </div>
+  );
+};
