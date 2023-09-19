@@ -62,12 +62,7 @@ export const App = () => {
     <div className="app">
       <Searchbar onSubmit={handleFormSubmit} />
       {isLoading && <Loader />}
-      <ImageGallery
-        images={images}
-        searchQuery={searchQuery}
-        page={page}
-        onImageClick={handleImageClick}
-      />
+      <ImageGallery images={images} onImageClick={handleImageClick} />
       {isImagesShown && shouldShowButton && (
         <LoadMore onLoadMore={handleLoadMoreClick} />
       )}
