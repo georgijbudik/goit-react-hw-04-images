@@ -4,7 +4,7 @@ import Modal from './Modal/';
 import { fetchImages } from 'services/api';
 import LoadMore from 'components/Button/';
 import Loader from './Loader/';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,24 +34,27 @@ export const App = () => {
     setLargeImageURL(largeImageURL);
     setShowModal(true);
   };
-
-  const fetchImagesAndUpdateState = async (searchQuery, page) => {
-    try {
-      const { hits, totalHits } = await fetchImages(searchQuery, page);
-      setIsLoading(true);
-      setImages(state => [...state, ...hits]);
-      setPage(state => state + 1);
-      setIsImagesShown(true);
-      setSearchQuery(searchQuery);
-      setTotalHits(totalHits);
-    } catch (error) {
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (!searchQuery) {
+      return;
     }
-  };
+    const fetchImagesAndUpdateState = async () => {
+      try {
+        const { hits, totalHits } = await fetchImages(searchQuery, page);
+        setIsLoading(true);
+        setImages(prevImages => [...prevImages, ...hits]);
+        setIsImagesShown(true);
+        setTotalHits(totalHits);
+      } catch (error) {
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleLoadMoreClick = () =>
-    fetchImagesAndUpdateState(searchQuery, page);
+    fetchImagesAndUpdateState();
+  }, [page, searchQuery]);
+
+  const handleLoadMoreClick = () => setPage(prevPage => prevPage + 1);
 
   const shouldShowButton = images.length < totalHits;
 
@@ -64,11 +67,11 @@ export const App = () => {
         searchQuery={searchQuery}
         page={page}
         onImageClick={handleImageClick}
-        renderImages={fetchImagesAndUpdateState}
       />
       {isImagesShown && shouldShowButton && (
         <LoadMore onLoadMore={handleLoadMoreClick} />
       )}
+
       {showModal && (
         <Modal largeImageURL={largeImageURL} onClose={handleCloseModal} />
       )}
