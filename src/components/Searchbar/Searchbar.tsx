@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import Notiflix from 'notiflix';
-import PropTypes from 'prop-types';
 
-const Searchbar = ({ onSubmit }) => {
+interface SearchbarProps {
+  onSubmit: (query: string) => void;
+}
+
+const Searchbar: React.FC<SearchbarProps> = ({ onSubmit }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleInputChange = e => setSearchQuery(e.currentTarget.value);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setSearchQuery(e.currentTarget.value);
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (searchQuery.trim() === '') {
@@ -36,10 +40,6 @@ const Searchbar = ({ onSubmit }) => {
       </form>
     </header>
   );
-};
-
-Searchbar.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default Searchbar;

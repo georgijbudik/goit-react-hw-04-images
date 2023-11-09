@@ -1,10 +1,15 @@
-import Searchbar from './Searchbar/';
-import ImageGallery from './ImageGallery/';
-import Modal from './Modal/';
+import Searchbar from './Searchbar';
+import ImageGallery from './ImageGallery';
+import Modal from './Modal';
 import { fetchImages } from 'services/api';
 import LoadMore from 'components/Button/';
-import Loader from './Loader/';
+import Loader from './Loader';
 import { useEffect, useState } from 'react';
+
+export interface FetchImagesResponse {
+  hits: [];
+  totalHits: number;
+}
 
 export const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +21,7 @@ export const App = () => {
   const [totalHits, setTotalHits] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFormSubmit = query => {
+  const handleFormSubmit = (query: string) => {
     if (query !== searchQuery) {
       setSearchQuery(query);
       setPage(1);
@@ -30,7 +35,7 @@ export const App = () => {
     setLargeImageURL('');
     setShowModal(false);
   };
-  const handleImageClick = largeImageURL => {
+  const handleImageClick = (largeImageURL: string) => {
     setLargeImageURL(largeImageURL);
     setShowModal(true);
   };
@@ -40,7 +45,10 @@ export const App = () => {
     }
     const fetchImagesAndUpdateState = async () => {
       try {
-        const { hits, totalHits } = await fetchImages(searchQuery, page);
+        const { hits, totalHits }: FetchImagesResponse = await fetchImages(
+          searchQuery,
+          page
+        );
         setIsLoading(true);
         setImages(prevImages => [...prevImages, ...hits]);
         setIsImagesShown(true);

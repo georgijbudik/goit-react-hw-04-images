@@ -1,7 +1,18 @@
 import ImageGalleryItem from 'components/ImageGalleryItem/';
-import PropTypes from 'prop-types';
 
-const ImageGallery = ({ images, onImageClick }) => {
+interface ImageGalleryProps {
+  images: {
+    id: number;
+    webformatURL: string;
+    largeImageURL: string;
+  }[];
+  onImageClick: (url: string) => void;
+}
+
+const ImageGallery: React.FC<ImageGalleryProps> = ({
+  images,
+  onImageClick,
+}) => {
   return (
     <div>
       <ul className="imageGallery">
@@ -16,10 +27,6 @@ const ImageGallery = ({ images, onImageClick }) => {
       </ul>
     </div>
   );
-};
-ImageGallery.propTypes = {
-  images: PropTypes.array.isRequired,
-  onImageClick: PropTypes.func.isRequired,
 };
 
 export default ImageGallery;
